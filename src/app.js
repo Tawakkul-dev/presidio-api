@@ -34,20 +34,24 @@ app.get('/', (c) => {
 app.post('/anonymize', async (c) => {
   try {
     const body = await c.req.json()
-    const analyzer_results = await analyze(body.text, body.language || 'en')
-    const anonymizer_results = await anonymize(
-      body.text,
-      analyzer_results,
-      body.anonymizers,
-      body.score || null,
-      body.exclude || null
-    )
-    return c.json(anonymizer_results, 200)
+    const original = body.text || ''
+
+    // Simulated PII replacement (mock logic)
+    const cleaned = original
+      .replace(/\b\d{3}[-.\s]??\d{3}[-.\s]??\d{4}\b/g, '<PHONE_NUMBER>')
+      .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '<PERSON>')
+      .replace(/\S+@\S+\.\S+/g, '<EMAIL>')
+
+    return c.json({
+      original_text: original,
+      cleaned_text: cleaned,
+    })
   } catch (error) {
     console.log(error.message)
     return c.json({ error: error.message }, 400)
   }
 })
+
 
 async function analyze(text, language) {
   let url = Bun.env.ANALYZE_ENDPOINT
